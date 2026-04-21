@@ -55,20 +55,14 @@ try {
 </head>
 <body>
   <!-- Header overlay -->
-  <div style="position:fixed;top:0;left:0;right:0;z-index:50;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;">
+  <div class="header-overlay">
     <div>
-      <h1 class="hero-title" style="font-size:clamp(1.4rem,3vw,2.2rem);font-weight:600;letter-spacing:0.03em;line-height:1.1;color:white;text-shadow:0 2px 20px rgba(0,0,0,0.8);">
-        💍 AstroGala
-      </h1>
-      <p style="font-size:0.8rem;color:rgba(255,255,255,0.5);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">
-        Galería de la boda
-      </p>
+      <h1 class="hero-title">💍 AstroGala</h1>
+      <p class="subtitle">Galería de la boda</p>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;pointer-events:auto;">
-      <a href="/qr" style="padding:6px 12px;border-radius:99px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.8rem;transition:all 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
-        QR
-      </a>
-      <span class="glass" style="padding:6px 14px;border-radius:99px;font-size:0.85rem;color:rgba(255,255,255,0.7);">
+    <div class="header-actions">
+      <a href="/qr" class="btn-qr">QR</a>
+      <span class="glass badge">
         <span id="count-num">{initialPhotos.length}</span> fotos
       </span>
     </div>
@@ -81,29 +75,29 @@ try {
     <GalleryIsland client:load initialPhotos={initialPhotos} />
   </div>
 
-  <!-- FAB Upload button -->
-  <a
-    href="/upload"
-    id="upload-fab"
-    style="
-      position:fixed;bottom:32px;right:32px;z-index:50;
-      display:flex;align-items:center;gap:10px;
-      padding:14px 24px;border-radius:99px;
-      background:linear-gradient(135deg,#e11d48,#db2777);
-      color:white;font-weight:600;font-size:1rem;
-      text-decoration:none;
-      box-shadow:0 8px 32px rgba(225,29,72,0.4);
-      transition:transform 0.2s,box-shadow 0.2s;
-    "
-    onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 12px 40px rgba(225,29,72,0.6)'"
-    onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 32px rgba(225,29,72,0.4)'"
-  >
-    📸 <span>Subir foto</span>
-  </a>
-
-  <!-- Drag hint -->
-  <div style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;opacity:0.5;font-size:0.8rem;color:white;letter-spacing:0.1em;">
-    Arrastra para explorar
-  </div>
+  <style is:global>
+    .header-overlay {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50; 
+      padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; 
+      pointer-events: none;
+    }
+    .header-overlay > * { pointer-events: auto; }
+    .header-overlay h1 { font-size: clamp(1.2rem, 4vw, 2rem); font-weight: 600; line-height: 1.1; text-shadow: 0 2px 20px rgba(0,0,0,0.8); }
+    .header-overlay .subtitle { font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .btn-qr { 
+      padding: 6px 14px; border-radius: 99px; background: rgba(255,255,255,0.06); 
+      border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); 
+      text-decoration: none; font-size: 0.8rem; transition: all 0.2s; 
+    }
+    .btn-qr:hover { color: white; background: rgba(255,255,255,0.12); }
+    .badge { padding: 6px 14px; border-radius: 99px; font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+    
+    /* Responsive adjustment for extra small screens */
+    @media (max-width: 380px) {
+      .header-overlay .subtitle { display: none; }
+      .header-overlay { padding: 12px 14px; }
+    }
+  </style>
 </body>
 </html>

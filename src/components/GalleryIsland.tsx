@@ -135,6 +135,45 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
     } catch (e) { }
   };
 
+  const FilterButton = ({ selectedGuest, setOpen, open, photos, guests, select }: any) => (
+    <button
+      onClick={() => setOpen(!open)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '7px',
+        padding: '7px 16px', borderRadius: '99px',
+        border: `1px solid ${selectedGuest ? 'rgba(225,29,72,0.7)' : 'rgba(255,255,255,0.15)'}`,
+        background: selectedGuest ? 'rgba(225,29,72,0.2)' : 'rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(16px)', color: selectedGuest ? '#fff' : 'rgba(255,255,255,0.55)',
+        fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
+      }}
+    >
+      <span>👥</span>
+      <span>{selectedGuest ?? 'Ver por persona'}</span>
+      {selectedGuest && (
+        <span onClick={e => { e.stopPropagation(); select(null); }} style={{ marginLeft: '2px', opacity: 0.6, fontSize: '0.75rem', cursor: 'pointer' }}>✕</span>
+      )}
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)',
+          minWidth: '200px', maxWidth: '280px', background: 'rgba(13,6,24,0.92)', backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '8px',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '2px',
+        }}>
+          <button onClick={() => select(null)} className="filter-item-btn" style={{ background: !selectedGuest ? 'rgba(225,29,72,0.2)' : 'transparent', color: !selectedGuest ? '#fff' : 'rgba(255,255,255,0.55)' }}>
+            <span>Todos</span> <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>{photos.length}</span>
+          </button>
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '4px 0' }} />
+          {guests.map((name: string) => (
+            <button key={name} onClick={() => select(name)} className="filter-item-btn" style={{ background: selectedGuest === name ? 'rgba(225,29,72,0.2)' : 'transparent', color: selectedGuest === name ? '#fff' : 'rgba(255,255,255,0.65)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>{selectedGuest === name && <span style={{ color: '#e11d48' }}>✓</span>}{name}</span>
+              <span style={{ background: selectedGuest === name ? 'rgba(225,29,72,0.4)' : 'rgba(255,255,255,0.12)', borderRadius: '99px', padding: '1px 8px', fontSize: '0.72rem' }}>{photos.filter(p => p.guestName === name).length}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </button>
+  );
+
   return (
     <>
       <style>{`
@@ -174,141 +213,116 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
           background: rgba(255,255,255,0.05);
           border-color: rgba(255,255,255,0.15);
         }
+
+        /* HUD STYLES */
+        .desktop-hud-el {
+          position: fixed; z-index: 70; transition: opacity 0.3s, transform 0.3s;
+        }
+        .mobile-dock {
+          position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+          z-index: 100; display: flex; align-items: center; gap: 8px;
+          background: rgba(15, 5, 30, 0.75); backdrop-filter: blur(20px);
+          padding: 6px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.12);
+          box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+          transition: opacity 0.3s, transform 0.3s;
+          width: calc(100% - 40px); max-width: 400px;
+          justify-content: space-around;
+        }
+        .dock-btn {
+          flex: 1; display: flex; align-items: center; justify-content: center;
+          gap: 6px; padding: 12px 8px; border-radius: 99px; border: none;
+          background: transparent; color: rgba(255,255,255,0.7);
+          font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+          text-decoration: none; white-space: nowrap;
+        }
+        .dock-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.05); }
+        .dock-btn-main {
+          background: linear-gradient(135deg, #e11d48, #db2777);
+          color: white; font-weight: 600; box-shadow: 0 4px 15px rgba(225,29,72,0.3);
+        }
+        .dock-btn-main:active { transform: scale(0.95); opacity: 0.9; }
+
+        /* Hide HUD when enlarging */
+        body:has([data-enlarging="true"]) .desktop-hud-el,
+        body:has([data-enlarging="true"]) .mobile-dock {
+          opacity: 0 !important; pointer-events: none !important; transform: translate(-50%, 20px) scale(0.9) !important;
+        }
+        /* Responsive Utilities */
+        .hidden { display: none; }
+        @media (min-width: 768px) {
+          .md\\:hidden { display: none !important; }
+          .md\\:block { display: block !important; }
+        }
+        @media (max-width: 767px) {
+          .mobile-only { display: block; }
+          .desktop-only { display: none; }
+        }
       `}</style>
-      {/* View & Background Toggle - Hidden in Totem Mode */}
+      {/* UI CONTROLS (HUD) */}
       {!isTotemMode && (
-        <div 
-          id="view-toggle"
-          style={{ 
-            position: 'fixed', 
-            bottom: '32px', 
-            left: '32px', 
-            zIndex: 70,
-            transition: 'opacity 0.3s, transform 0.3s'
-          }}
-        >
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', padding: '4px', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
-            <button onClick={() => setViewMode('dome')} style={{ padding: '8px 16px', borderRadius: '99px', border: 'none', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'dome' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'dome' ? '#fff' : 'rgba(255,255,255,0.5)' }}>🌐 Domo</button>
-            <button onClick={() => setViewMode('grid')} style={{ padding: '8px 16px', borderRadius: '99px', border: 'none', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'grid' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'grid' ? '#fff' : 'rgba(255,255,255,0.5)' }}>📱 Feed</button>
+        <>
+          {/* DESKTOP HUD */}
+          <div className="hidden md:block desktop-hud-el" style={{ bottom: '32px', left: '32px' }}>
+            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', padding: '4px', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+              <button onClick={() => setViewMode('dome')} style={{ padding: '8px 16px', borderRadius: '99px', border: 'none', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'dome' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'dome' ? '#fff' : 'rgba(255,255,255,0.5)' }}>🌐 Domo</button>
+              <button onClick={() => setViewMode('grid')} style={{ padding: '8px 16px', borderRadius: '99px', border: 'none', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'grid' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'grid' ? '#fff' : 'rgba(255,255,255,0.5)' }}>📱 Feed</button>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Filter button — only when multiple guests and not in Totem Mode */}
-      {!isTotemMode && guests.length > 1 && (
-        <div 
-          ref={dropdownRef} 
-          id="person-filter"
-          style={{ 
-            position: 'fixed', 
-            top: '84px', 
-            left: '50%', 
-            transform: 'translateX(-50%)', 
-            zIndex: 70,
-            transition: 'opacity 0.3s, transform 0.3s'
-          }}
-        >
-
-          {/* Trigger */}
-          <button
-            onClick={() => setOpen(o => !o)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '7px',
-              padding: '7px 16px',
-              borderRadius: '99px',
-              border: `1px solid ${selectedGuest ? 'rgba(225,29,72,0.7)' : 'rgba(255,255,255,0.15)'}`,
-              background: selectedGuest ? 'rgba(225,29,72,0.2)' : 'rgba(255,255,255,0.07)',
-              backdropFilter: 'blur(16px)',
-              color: selectedGuest ? '#fff' : 'rgba(255,255,255,0.55)',
-              fontSize: '0.82rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <span>👥</span>
-            <span>{selectedGuest ?? 'Ver por persona'}</span>
-            {selectedGuest && (
-              <span
-                onClick={e => { e.stopPropagation(); select(null); }}
-                style={{ marginLeft: '2px', opacity: 0.6, fontSize: '0.75rem', cursor: 'pointer' }}
-              >✕</span>
-            )}
-          </button>
-
-          {/* Dropdown */}
-          {open && (
-            <div style={{
-              position: 'absolute',
-              top: 'calc(100% + 8px)',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              minWidth: '200px',
-              maxWidth: '280px',
-              background: 'rgba(13,6,24,0.92)',
-              backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '16px',
-              padding: '8px',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2px',
-            }}>
-              {/* All option */}
-              <button
-                onClick={() => select(null)}
-                style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '9px 12px', borderRadius: '10px', border: 'none',
-                  background: !selectedGuest ? 'rgba(225,29,72,0.2)' : 'transparent',
-                  color: !selectedGuest ? '#fff' : 'rgba(255,255,255,0.55)',
-                  cursor: 'pointer', fontSize: '0.88rem', textAlign: 'left',
-                  transition: 'background 0.15s',
-                }}
-                onMouseOver={e => { if (selectedGuest) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
-                onMouseOut={e => { if (selectedGuest) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-              >
-                <span>Todos</span>
-                <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>{photos.length}</span>
-              </button>
-
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '4px 0' }} />
-
-              {/* Per-guest */}
-              {guests.map(name => {
-                const count = photos.filter(p => p.guestName === name).length;
-                const active = selectedGuest === name;
-                return (
-                  <button
-                    key={name}
-                    onClick={() => select(name)}
-                    style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '9px 12px', borderRadius: '10px', border: 'none',
-                      background: active ? 'rgba(225,29,72,0.2)' : 'transparent',
-                      color: active ? '#fff' : 'rgba(255,255,255,0.65)',
-                      cursor: 'pointer', fontSize: '0.88rem', textAlign: 'left',
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseOver={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
-                    onMouseOut={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                      {active && <span style={{ color: '#e11d48' }}>✓</span>}
-                      {name}
-                    </span>
-                    <span style={{
-                      background: active ? 'rgba(225,29,72,0.4)' : 'rgba(255,255,255,0.12)',
-                      borderRadius: '99px', padding: '1px 8px', fontSize: '0.72rem',
-                    }}>{count}</span>
-                  </button>
-                );
-              })}
+          {!isTotemMode && guests.length > 1 && (
+            <div ref={dropdownRef} className="hidden md:block desktop-hud-el" style={{ top: '84px', left: '50%', transform: 'translateX(-50%)' }}>
+               <FilterButton selectedGuest={selectedGuest} setOpen={setOpen} open={open} photos={photos} guests={guests} select={select} />
             </div>
           )}
-        </div>
+
+          {/* MOBILE DOCK */}
+          <div className="mobile-dock md:hidden">
+            <button className="dock-btn" onClick={() => setViewMode(viewMode === 'dome' ? 'grid' : 'dome')}>
+               {viewMode === 'dome' ? '📱 Feed' : '🌐 Domo'}
+            </button>
+            
+            <a href="/upload" className="dock-btn dock-btn-main">
+               📸 Subir
+            </a>
+
+            {guests.length > 1 && (
+              <div ref={dropdownRef} style={{ position: 'relative' }}>
+                 <button className="dock-btn" onClick={() => setOpen(!open)}>
+                    👥 Filtros
+                 </button>
+                 {open && (
+                    <div style={{
+                      position: 'absolute', bottom: 'calc(100% + 12px)', left: '50%', transform: 'translateX(-50%)',
+                      minWidth: '200px', background: 'rgba(13,6,24,0.95)', backdropFilter: 'blur(24px)',
+                      border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '8px',
+                      boxShadow: '0 -12px 40px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '2px',
+                    }}>
+                      <div className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1 px-3">Ver fotos de:</div>
+                      <button onClick={() => select(null)} className="filter-item-btn" style={{ background: !selectedGuest ? 'rgba(225,29,72,0.2)' : 'transparent', color: !selectedGuest ? '#fff' : 'rgba(255,255,255,0.55)' }}>
+                        <span>Todos</span> <span>{photos.length}</span>
+                      </button>
+                      {guests.map(name => (
+                        <button key={name} onClick={() => select(name)} className="filter-item-btn" style={{ background: selectedGuest === name ? 'rgba(225,29,72,0.2)' : 'transparent', color: selectedGuest === name ? '#fff' : 'rgba(255,255,255,0.65)' }}>
+                          <span>{name}</span> <span>{photos.filter(p => p.guestName === name).length}</span>
+                        </button>
+                      ))}
+                    </div>
+                 )}
+              </div>
+            )}
+          </div>
+        </>
       )}
+
+      {/* Styles helper for filter buttons */}
+      <style>{`
+        .filter-item-btn {
+          display: flex; justify-content: space-between; align-items: center;
+          padding: 10px 14px; border-radius: 10px; border: none;
+          cursor: pointer; font-size: 0.9rem; text-align: left; transition: background 0.15s;
+        }
+        .filter-item-btn:hover { background: rgba(255,255,255,0.06); }
+      `}</style>
 
       {isTotemMode ? (
         <InfiniteGrid photos={photos} />
