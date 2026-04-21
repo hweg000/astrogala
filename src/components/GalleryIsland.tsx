@@ -177,17 +177,37 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
       `}</style>
       {/* View & Background Toggle - Hidden in Totem Mode */}
       {!isTotemMode && (
-        <div style={{ position: 'fixed', top: '18px', right: '20px', zIndex: 70 }}>
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', padding: '4px', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <button onClick={() => setViewMode('dome')} style={{ padding: '6px 12px', borderRadius: '99px', border: 'none', fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'dome' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'dome' ? '#fff' : 'rgba(255,255,255,0.5)' }}>🌐 Domo</button>
-            <button onClick={() => setViewMode('grid')} style={{ padding: '6px 12px', borderRadius: '99px', border: 'none', fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'grid' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'grid' ? '#fff' : 'rgba(255,255,255,0.5)' }}>📱 Feed</button>
+        <div 
+          id="view-toggle"
+          style={{ 
+            position: 'fixed', 
+            bottom: '32px', 
+            left: '32px', 
+            zIndex: 70,
+            transition: 'opacity 0.3s, transform 0.3s'
+          }}
+        >
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', padding: '4px', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+            <button onClick={() => setViewMode('dome')} style={{ padding: '8px 16px', borderRadius: '99px', border: 'none', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'dome' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'dome' ? '#fff' : 'rgba(255,255,255,0.5)' }}>🌐 Domo</button>
+            <button onClick={() => setViewMode('grid')} style={{ padding: '8px 16px', borderRadius: '99px', border: 'none', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', background: viewMode === 'grid' ? 'rgba(255,255,255,0.15)' : 'transparent', color: viewMode === 'grid' ? '#fff' : 'rgba(255,255,255,0.5)' }}>📱 Feed</button>
           </div>
         </div>
       )}
 
       {/* Filter button — only when multiple guests and not in Totem Mode */}
       {!isTotemMode && guests.length > 1 && (
-        <div ref={dropdownRef} style={{ position: 'fixed', top: '18px', left: '50%', transform: 'translateX(-50%)', zIndex: 70 }}>
+        <div 
+          ref={dropdownRef} 
+          id="person-filter"
+          style={{ 
+            position: 'fixed', 
+            top: '84px', 
+            left: '50%', 
+            transform: 'translateX(-50%)', 
+            zIndex: 70,
+            transition: 'opacity 0.3s, transform 0.3s'
+          }}
+        >
 
           {/* Trigger */}
           <button
