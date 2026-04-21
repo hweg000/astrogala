@@ -527,7 +527,7 @@ export default function DomeGallery({
     const rawCaption = parent.dataset.caption || '';
     const rawGuest = parent.dataset.guestName || '';
 
-    const isVideo = rawSrc.match(/\\.(mp4|webm|mov)$/i);
+    const isVideo = rawSrc.match(/\.(mp4|webm|mov)$/i);
     const mediaEl = document.createElement(isVideo ? 'video' : 'img');
     mediaEl.src = rawSrc;
     if (isVideo) {
@@ -950,7 +950,7 @@ export default function DomeGallery({
                     }}
                     style={{ inset: '10px', borderRadius: `var(--tile-radius, ${imageBorderRadius})`, backfaceVisibility: 'hidden' }}
                   >
-                    {it.src.match(/\\.(mp4|webm|mov)$/i) ? (
+                    {it.src.match(/\.(mp4|webm|mov)$/i) ? (
                       <video
                         src={it.src}
                         autoPlay loop muted playsInline

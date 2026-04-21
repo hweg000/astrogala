@@ -316,7 +316,7 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
               </div>
 
               <div style={{ borderRadius: '16px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.5)', aspectRatio: '1/1', position: 'relative' }}>
-                {p.url.match(/\\.(mp4|webm|mov)$/i) ? (
+                {p.url.match(/\.(mp4|webm|mov)$/i) ? (
                   <video src={p.url} style={{ width: '100%', height: '100%', objectFit: 'contain' }} autoPlay loop muted playsInline />
                 ) : (
                   <img src={p.url} alt="Foto" style={{ width: '100%', height: '100%', objectFit: 'contain' }} loading="lazy" />
