@@ -951,12 +951,17 @@ export default function DomeGallery({
                     style={{ inset: '10px', borderRadius: `var(--tile-radius, ${imageBorderRadius})`, backfaceVisibility: 'hidden' }}
                   >
                     {it.src.match(/\.(mp4|webm|mov)$/i) ? (
-                      <video
-                        src={it.src}
-                        autoPlay loop muted playsInline
-                        className="w-full h-full object-cover pointer-events-none"
-                        style={{ backfaceVisibility: 'hidden', filter: `var(--image-filter, ${grayscale ? 'grayscale(1)' : 'none'})` }}
-                      />
+                      <div className="relative w-full h-full">
+                        <video
+                          src={`${it.src}#t=0.001`}
+                          preload="metadata"
+                          className="w-full h-full object-cover pointer-events-none"
+                          style={{ backfaceVisibility: 'hidden', filter: `var(--image-filter, ${grayscale ? 'grayscale(1)' : 'none'})` }}
+                        />
+                        <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.2)', pointerEvents: 'none' }}>
+                          <span style={{ fontSize: '1.2rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>▶️</span>
+                        </div>
+                      </div>
                     ) : (
                       <img
                         src={it.src}
