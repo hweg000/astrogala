@@ -22,9 +22,9 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Formato no permitido (usa JPG, PNG, MP4, MOV o WEBM)' }), { status: 400 });
     }
 
-    // Validate size (50MB)
-    if (file.size > 50 * 1024 * 1024) {
-      return new Response(JSON.stringify({ error: 'Archivo demasiado grande (máx 50MB)' }), { status: 400 });
+    // Validate size (25MB for better mobile performance)
+    if (file.size > 25 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: 'Archivo demasiado pesado (máx 25MB). ¡Intenta con uno más corto!' }), { status: 400 });
     }
 
     // Create uploads dir

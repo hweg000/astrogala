@@ -29,7 +29,28 @@ export default function UploadForm({ onSuccess }: UploadFormProps) {
     }
   }, []);
 
-  const handleFile = (f: File) => {
+  const compressImage = async (file: File): Promise<Blob | File> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width  = img.width;
+        let height = img.height;
+        const MAX  = 1600;
+        if (width > height) { if (width > MAX) { height *= MAX / width; width = MAX; } }
+        else { if (height > MAX) { width *= MAX / height; height = MAX; } }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.82);
+      };
+      img.onerror = () => resolve(file);
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleFile = async (f: File) => {
     const isImage = f.type.startsWith('image/');
     const isVideo = f.type.startsWith('video/');
     
@@ -38,16 +59,29 @@ export default function UploadForm({ onSuccess }: UploadFormProps) {
       return; 
     }
     
-    if (f.size > 50 * 1024 * 1024) { 
-      setError('El archivo es demasiado grande (máximo 50MB)'); 
+    // UI check matches server limit (25MB)
+    if (f.size > 25 * 1024 * 1024) { 
+      setError('El archivo es demasiado grande (máximo 25MB). ¡Intenta con uno más corto!'); 
       return; 
     }
 
     setError('');
-    setFile(f);
-    const reader = new FileReader();
-    reader.onloadend = () => setPreview(reader.result as string);
-    reader.readAsDataURL(f);
+    
+    if (isImage) {
+      setUploading(true); // show loader during compression
+      const compressed = await compressImage(f);
+      const compressedFile = new File([compressed], f.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: 'image/jpeg' });
+      setFile(compressedFile);
+      setUploading(false);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result as string);
+      reader.readAsDataURL(compressedFile);
+    } else {
+      setFile(f);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result as string);
+      reader.readAsDataURL(f);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
