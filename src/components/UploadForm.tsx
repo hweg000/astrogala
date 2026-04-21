@@ -170,11 +170,21 @@ export default function UploadForm({ onSuccess }: UploadFormProps) {
             <p className="text-white/40 text-sm">Biblioteca o cámara · max 50MB</p>
           </div>
         )}
-        <input ref={inputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-        {/* Camera capture — mobile only */}
-        <input ref={cameraRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" capture="environment" className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+        <input 
+          ref={inputRef} 
+          type="file" 
+          accept="image/*,video/*" 
+          className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} 
+        />
+        {/* Usamos el mismo input para todo por compatibilidad */}
+        <input 
+          ref={cameraRef} 
+          type="file" 
+          accept="image/*,video/*" 
+          className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} 
+        />
       </div>
 
       {/* Camera button */}

@@ -43,6 +43,12 @@ try {
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255,255,255,0.12);
     }
+    /* Ocultar botón de subir cuando hay una foto abierta */
+    body:has([data-enlarging="true"]) #upload-fab {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.8);
+    }
   </style>
 </head>
 <body>
