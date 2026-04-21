@@ -253,7 +253,24 @@ export default function DomeGallery({
     return () => ro.disconnect();
   }, [fit, fitBasis, minRadius, maxRadius, padFactor, overlayBlurColor, grayscale, imageBorderRadius, openedImageBorderRadius, openedImageWidth, openedImageHeight]);
 
-  useEffect(() => { applyTransform(rotationRef.current.x, rotationRef.current.y); }, []);
+  useEffect(() => {
+    applyTransform(rotationRef.current.x, rotationRef.current.y);
+    
+    // Deep linking: check if URL has #photo-id
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#photo-')) {
+        const id = hash.replace('#photo-', '');
+        setTimeout(() => {
+          const el = sphereRef.current?.querySelector(`[data-id="${id}"] .item__image`) as HTMLElement;
+          if (el) openItemFromElement(el);
+        }, 500); // Wait for items to be ready
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // ── Auto-rotation ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -603,14 +620,22 @@ export default function DomeGallery({
         
         ${photoId ? `
           <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:12px; margin-top:4px;">
-            <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
-              <button id="btn-polaroid-${photoId}" style="
-                background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-                color: white; border-radius: 99px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; display: flex; alignItems: center; gap: 4px; transition: all 0.2s;
-              ">
-                <span>📥</span> Compartir
-              </button>
-            </div>
+                <div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">
+                  <button id="btn-polaroid-${photoId}" style="
+                    background: linear-gradient(135deg, #e11d48, #db2777);
+                    border: none; color: white; border-radius: 99px; padding: 6px 14px;
+                    font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+                  ">
+                    <span>📱</span> Compartir Historia
+                  </button>
+                  <button id="btn-copy-${photoId}" style="
+                    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+                    color: white; border-radius: 99px; padding: 6px 14px;
+                    font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+                  ">
+                    <span>🔗</span> Link
+                  </button>
+                </div>
             <div id="comments-list-${photoId}" style="max-height:100px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:8px;">
               ${commentsRaw.map((c: any) => `
                 <div style="font-size:0.8rem; color:rgba(255,255,255,0.8);">
@@ -736,7 +761,20 @@ export default function DomeGallery({
           });
         }
         
-        // Setup comment logic
+        // Setup Copy Link
+        const copyBtn = card.querySelector(`#btn-copy-${photoId}`) as HTMLButtonElement;
+        if (copyBtn) {
+          copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const url = window.location.origin + window.location.pathname + "#photo-" + photoId;
+            navigator.clipboard.writeText(url);
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = "✅ Copiado";
+            setTimeout(() => copyBtn.innerHTML = originalText, 2000);
+          });
+        }
+
+        // Setup Comment logic
         const inputEl = card.querySelector(`#comment-input-${photoId}`) as HTMLInputElement;
         const submitBtn = card.querySelector(`#btn-comment-${photoId}`) as HTMLButtonElement;
         const listEl = card.querySelector(`#comments-list-${photoId}`) as HTMLDivElement;

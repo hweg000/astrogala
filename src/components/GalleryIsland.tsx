@@ -373,31 +373,49 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
                 <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem', lineHeight: 1.5, fontStyle: 'italic', fontFamily: 'Georgia, serif', borderLeft: '2px solid rgba(225,29,72,0.6)', paddingLeft: '12px', margin: '16px 0 0' }}>"{p.caption}"</p>
               )}
 
-              <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
-                <button 
+              {/* Actions Bar */}
+              <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
+                <button
                   onClick={() => downloadPolaroid(p.url, p.guestName, p.caption)}
                   style={{
-                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-                    color: 'white', borderRadius: '99px', padding: '6px 14px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s'
+                    background: 'linear-gradient(135deg, #e11d48, #db2777)',
+                    border: 'none', color: 'white', borderRadius: '99px', padding: '6px 14px',
+                    fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s'
                   }}
                   onPointerDown={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.95)' }}
                   onPointerUp={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
-                  onPointerLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
                 >
-                  <span>📥</span> <span>Compartir</span>
+                  📱 Story
                 </button>
+                
                 <button
                   onClick={() => handleLike(p.id)}
                   style={{
-                    background: (typeof window !== 'undefined' && localStorage.getItem(`astrogala_liked_${p.id}`)) ? 'rgba(225,29,72,0.4)' : 'rgba(225,29,72,0.15)',
-                    border: '1px solid rgba(225,29,72,0.3)',
+                    background: (typeof window !== 'undefined' && localStorage.getItem(`astrogala_liked_${p.id}`)) ? 'rgba(225,29,72,0.4)' : 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.15)',
                     color: 'white', borderRadius: '99px', padding: '6px 14px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s'
                   }}
                   onPointerDown={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.95)' }}
                   onPointerUp={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
-                  onPointerLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
                 >
                   <span>❤️</span> <span>{p.likes || 0}</span>
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    const url = window.location.origin + window.location.pathname + "#photo-" + p.id;
+                    navigator.clipboard.writeText(url);
+                    const btn = e.currentTarget as HTMLButtonElement;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = "🔗 Copiado";
+                    setTimeout(() => btn.innerHTML = originalText, 2000);
+                  }}
+                  style={{
+                    background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                    color: 'white', borderRadius: '99px', padding: '6px 14px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                >
+                  🔗 Link
                 </button>
               </div>
 
