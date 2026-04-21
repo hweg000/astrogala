@@ -30,8 +30,19 @@ export default function UploadForm({ onSuccess }: UploadFormProps) {
   }, []);
 
   const handleFile = (f: File) => {
-    if (!f.type.startsWith('image/')) { setError('Solo imágenes (JPG, PNG, WEBP, GIF)'); return; }
-    if (f.size > 10 * 1024 * 1024)   { setError('Máximo 10MB'); return; }
+    const isImage = f.type.startsWith('image/');
+    const isVideo = f.type.startsWith('video/');
+    
+    if (!isImage && !isVideo) { 
+      setError('Solo fotos o videos (JPG, PNG, MP4, MOV, WEBM)'); 
+      return; 
+    }
+    
+    if (f.size > 50 * 1024 * 1024) { 
+      setError('El archivo es demasiado grande (máximo 50MB)'); 
+      return; 
+    }
+
     setError('');
     setFile(f);
     const reader = new FileReader();
@@ -138,16 +149,25 @@ export default function UploadForm({ onSuccess }: UploadFormProps) {
       >
         {preview ? (
           <div className="relative">
-            <img src={preview} alt="Preview" className="w-full max-h-64 object-cover rounded-xl" />
-            <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              <span className="text-white font-medium">Cambiar foto</span>
+            {file?.type.startsWith('video/') ? (
+              <video 
+                src={preview} 
+                className="w-full max-h-64 object-cover rounded-xl" 
+                controls 
+                muted
+              />
+            ) : (
+              <img src={preview} alt="Preview" className="w-full max-h-64 object-cover rounded-xl" />
+            )}
+            <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+              <span className="text-white font-medium">Cambiar archivo</span>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 py-8">
             <div className="text-5xl">📸</div>
-            <p className="text-white font-semibold">Toca para seleccionar tu foto</p>
-            <p className="text-white/40 text-sm">o arrastra aquí · JPG, PNG, WEBP · max 10MB</p>
+            <p className="text-white font-semibold">Toca para seleccionar foto o video</p>
+            <p className="text-white/40 text-sm">Biblioteca o cámara · max 50MB</p>
           </div>
         )}
         <input ref={inputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" className="hidden"
@@ -165,7 +185,7 @@ export default function UploadForm({ onSuccess }: UploadFormProps) {
           className="flex items-center justify-center gap-2 py-3 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white text-sm font-medium transition-all"
         >
           <span className="text-lg">📷</span>
-          Tomar foto con la cámara
+          Tomar foto o video
         </button>
       )}
 
