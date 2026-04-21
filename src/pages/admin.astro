@@ -1,0 +1,32 @@
+---
+import AdminPanel from '../components/AdminPanel';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moderación — AstroGala</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100vh;
+      background: #0d0618;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: white;
+      background-image: radial-gradient(ellipse at 50% -20%, rgba(225,29,72,0.15), transparent 60%);
+    }
+  </style>
+  <link rel="stylesheet" href="/src/styles/global.css" />
+</head>
+<body>
+  <nav style="position:fixed; top:20px; left:20px; z-index:50;">
+    <a href="/" style="color:rgba(255,255,255,0.5); text-decoration:none; padding:8px 16px; background:rgba(255,255,255,0.05); border-radius:99px; font-size:0.9rem; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
+      ← Volver al domo
+    </a>
+  </nav>
+
+  <AdminPanel client:only="react" />
+</body>
+</html>

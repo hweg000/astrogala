@@ -1,0 +1,101 @@
+---
+import { readFile } from 'fs/promises';
+import { existsSync } from 'fs';
+import '../styles/global.css';
+import path from 'path';
+import GalleryIsland from '../components/GalleryIsland';
+import InteractiveBackground from '../components/InteractiveBackground';
+
+// Load photos server-side for initial render
+let initialPhotos: { url: string; guestName: string; caption: string }[] = [];
+try {
+  const dataPath = path.join(process.cwd(), 'data', 'photos.json');
+  if (existsSync(dataPath)) {
+    const raw = await readFile(dataPath, 'utf-8');
+    const all = JSON.parse(raw);
+    initialPhotos = all.filter((p: any) => p.approved !== false);
+  }
+} catch {}
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Galería de fotos de la boda — comparte tus mejores momentos" />
+  <title>💍 AstroGala — Galería de Boda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body {
+      background: #0d0618;
+      font-family: 'Inter', sans-serif;
+      color: white;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .glass {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header overlay -->
+  <div style="position:fixed;top:0;left:0;right:0;z-index:50;padding:24px 32px;display:flex;align-items:center;justify-between;pointer-events:none;">
+    <div>
+      <h1 class="hero-title" style="font-size:clamp(1.4rem,3vw,2.2rem);font-weight:600;letter-spacing:0.03em;line-height:1.1;color:white;text-shadow:0 2px 20px rgba(0,0,0,0.8);">
+        💍 AstroGala
+      </h1>
+      <p style="font-size:0.8rem;color:rgba(255,255,255,0.5);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">
+        Galería de la boda
+      </p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;pointer-events:auto;">
+      <a href="/qr" style="padding:6px 12px;border-radius:99px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.8rem;transition:all 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
+        QR
+      </a>
+      <span class="glass" style="padding:6px 14px;border-radius:99px;font-size:0.85rem;color:rgba(255,255,255,0.7);">
+        <span id="count-num">{initialPhotos.length}</span> fotos
+      </span>
+    </div>
+  </div>
+
+  <InteractiveBackground client:load />
+
+  <!-- Gallery (full screen) -->
+  <div style="width:100vw;height:100vh;">
+    <GalleryIsland client:load initialPhotos={initialPhotos} />
+  </div>
+
+  <!-- FAB Upload button -->
+  <a
+    href="/upload"
+    id="upload-fab"
+    style="
+      position:fixed;bottom:32px;right:32px;z-index:50;
+      display:flex;align-items:center;gap:10px;
+      padding:14px 24px;border-radius:99px;
+      background:linear-gradient(135deg,#e11d48,#db2777);
+      color:white;font-weight:600;font-size:1rem;
+      text-decoration:none;
+      box-shadow:0 8px 32px rgba(225,29,72,0.4);
+      transition:transform 0.2s,box-shadow 0.2s;
+    "
+    onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 12px 40px rgba(225,29,72,0.6)'"
+    onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 32px rgba(225,29,72,0.4)'"
+  >
+    📸 <span>Subir foto</span>
+  </a>
+
+  <!-- Drag hint -->
+  <div style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;opacity:0.5;font-size:0.8rem;color:white;letter-spacing:0.1em;">
+    Arrastra para explorar
+  </div>
+</body>
+</html>
