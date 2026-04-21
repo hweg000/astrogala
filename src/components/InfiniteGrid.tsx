@@ -106,13 +106,19 @@ export default function InfiniteGrid({ photos, autoScrollSpeed = { x: 0.3, y: 0.
           }}
         >
           {p.url.match(/\.(mp4|webm|mov)$/i) ? (
-            <video 
-              src={p.url} 
-              autoPlay 
-              muted 
-              loop 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            />
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <video 
+                src={`${p.url}#t=0.001`}
+                preload="metadata"
+                muted 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+              <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.15)' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)', display: 'grid', placeItems: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+              </div>
+            </div>
           ) : (
             <img 
               src={p.url} 

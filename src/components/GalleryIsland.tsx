@@ -359,7 +359,9 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
                       muted playsInline 
                     />
                     <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.15)', pointerEvents: 'none' }}>
-                      <span style={{ fontSize: '2.5rem', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))', opacity: 0.8 }}>▶️</span>
+                      <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)', display: 'grid', placeItems: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                      </div>
                     </div>
                   </div>
                 ) : (
