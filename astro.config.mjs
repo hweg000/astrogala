@@ -9,6 +9,9 @@ import node from '@astrojs/node';
 export default defineConfig({
   output: 'server',
   server: { port: 4322 },
+  security: {
+    checkOrigin: false
+  },
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
