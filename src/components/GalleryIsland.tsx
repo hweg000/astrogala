@@ -81,13 +81,21 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
     }, []);
   }, [photos]);
 
+  const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
+
   const filtered = useMemo(() =>
     selectedGuest ? photos.filter(p => p.guestName === selectedGuest) : photos,
     [photos, selectedGuest]
   );
 
-  const images = filtered.length > 0
-    ? filtered.map(p => ({
+  const photosNoVideos = useMemo(() => photos.filter(p => !isVideo(p.url)), [photos]);
+  const filteredNoVideos = useMemo(() => 
+    selectedGuest ? photosNoVideos.filter(p => p.guestName === selectedGuest) : photosNoVideos,
+    [photosNoVideos, selectedGuest]
+  );
+
+  const images = filteredNoVideos.length > 0
+    ? filteredNoVideos.map(p => ({
       id: p.id,
       likes: p.likes || 0,
       comments: p.comments || [],
@@ -325,7 +333,7 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
       `}</style>
 
       {isTotemMode ? (
-        <InfiniteGrid photos={photos} />
+        <InfiniteGrid photos={photosNoVideos} />
       ) : viewMode === 'dome' ? (
         <DomeGallery
           images={images}
@@ -399,23 +407,6 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
                   onPointerUp={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
                 >
                   <span>❤️</span> <span>{p.likes || 0}</span>
-                </button>
-
-                <button
-                  onClick={(e) => {
-                    const url = window.location.origin + window.location.pathname + "#photo-" + p.id;
-                    navigator.clipboard.writeText(url);
-                    const btn = e.currentTarget as HTMLButtonElement;
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = "🔗 Copiado";
-                    setTimeout(() => btn.innerHTML = originalText, 2000);
-                  }}
-                  style={{
-                    background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
-                    color: 'white', borderRadius: '99px', padding: '6px 14px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
-                  }}
-                >
-                  🔗 Link
                 </button>
               </div>
 

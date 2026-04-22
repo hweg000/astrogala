@@ -628,14 +628,7 @@ export default function DomeGallery({
                   ">
                     <span>📱</span> Compartir Historia
                   </button>
-                  <button id="btn-copy-${photoId}" style="
-                    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-                    color: white; border-radius: 99px; padding: 6px 14px;
-                    font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
-                  ">
-                    <span>🔗</span> Link
-                  </button>
-                </div>
+                  </div>
             <div id="comments-list-${photoId}" style="max-height:100px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:8px;">
               ${commentsRaw.map((c: any) => `
                 <div style="font-size:0.8rem; color:rgba(255,255,255,0.8);">
@@ -761,18 +754,6 @@ export default function DomeGallery({
           });
         }
         
-        // Setup Copy Link
-        const copyBtn = card.querySelector(`#btn-copy-${photoId}`) as HTMLButtonElement;
-        if (copyBtn) {
-          copyBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const url = window.location.origin + window.location.pathname + "#photo-" + photoId;
-            navigator.clipboard.writeText(url);
-            const originalText = copyBtn.innerHTML;
-            copyBtn.innerHTML = "✅ Copiado";
-            setTimeout(() => copyBtn.innerHTML = originalText, 2000);
-          });
-        }
 
         // Setup Comment logic
         const inputEl = card.querySelector(`#comment-input-${photoId}`) as HTMLInputElement;
