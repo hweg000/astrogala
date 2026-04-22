@@ -255,7 +255,7 @@ export default function DomeGallery({
 
   useEffect(() => {
     applyTransform(rotationRef.current.x, rotationRef.current.y);
-    
+
     // Deep linking: check if URL has #photo-id
     const handleHash = () => {
       const hash = window.location.hash;
@@ -576,11 +576,11 @@ export default function DomeGallery({
 
     // ── Caption card (responsive) ───────────────────────────────────────────
     const showCaptionCard = () => {
-      const photoId      = parent.dataset.id || '';
+      const photoId = parent.dataset.id || '';
       const initialLikes = parseInt(parent.dataset.likes || '0', 10);
       let commentsRaw = [];
-      try { commentsRaw = JSON.parse(parent.dataset.comments || '[]'); } catch(e){}
-      
+      try { commentsRaw = JSON.parse(parent.dataset.comments || '[]'); } catch (e) { }
+
       if (!rawCaption && !rawGuest && !photoId) return;
 
       const overlayRect = overlay.getBoundingClientRect();
@@ -595,7 +595,7 @@ export default function DomeGallery({
       const cardInnerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;${!isMobile && rawCaption ? '' : 'margin-bottom:6px;'}">
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:1.1rem;">💌</span>
+            <span style="font-size:1.1rem;">DE:</span>
             <span style="font-family:'Cormorant Garamond',Georgia,serif;font-size:${isMobile ? '1rem' : '1.15rem'};font-weight:600;color:#fff;letter-spacing:0.02em;line-height:1.2;">${rawGuest || 'Invitado'}</span>
           </div>
           ${photoId ? `
@@ -713,11 +713,11 @@ export default function DomeGallery({
             const btnEl = e.currentTarget as HTMLButtonElement;
             btnEl.style.transform = 'scale(1.1)';
             setTimeout(() => btnEl.style.transform = 'scale(1)', 150);
-            
+
             // Check localStorage to prevent massive spam? Optional, but good practice
             const likedKey = `astrogala_liked_${photoId}`;
             if (localStorage.getItem(likedKey)) return; // Already liked locally
-            
+
             try {
               const res = await fetch(`/api/photos/${photoId}`, {
                 method: 'PUT',
@@ -734,13 +734,13 @@ export default function DomeGallery({
               }
             } catch (err) { console.error('Like error', err); }
           });
-          
+
           // Style differently if already liked
           if (localStorage.getItem(`astrogala_liked_${photoId}`)) {
             (btn as HTMLElement).style.background = 'rgba(225,29,72,0.4)';
           }
         }
-        
+
         // Setup Polaroid download
         const polaroidBtn = card.querySelector(`#btn-polaroid-${photoId}`) as HTMLButtonElement;
         if (polaroidBtn) {
@@ -753,13 +753,13 @@ export default function DomeGallery({
             downloadPolaroid(mediaSrc, rawGuest, rawCaption);
           });
         }
-        
+
 
         // Setup Comment logic
         const inputEl = card.querySelector(`#comment-input-${photoId}`) as HTMLInputElement;
         const submitBtn = card.querySelector(`#btn-comment-${photoId}`) as HTMLButtonElement;
         const listEl = card.querySelector(`#comments-list-${photoId}`) as HTMLDivElement;
-        
+
         const handleCommentSubmit = async (e?: Event) => {
           e?.stopPropagation();
           const text = inputEl.value.trim();
@@ -773,19 +773,19 @@ export default function DomeGallery({
           listEl.appendChild(div);
           listEl.scrollTop = listEl.scrollHeight;
           let currentComments = [];
-          try { currentComments = JSON.parse(parent.dataset.comments || '[]'); } catch(err){}
+          try { currentComments = JSON.parse(parent.dataset.comments || '[]'); } catch (err) { }
           currentComments.push({ text, author });
           parent.dataset.comments = JSON.stringify(currentComments);
-          
+
           try {
             await fetch(`/api/photos/${photoId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ action: 'comment', comment: { text, author } })
             });
-          } catch(err){}
+          } catch (err) { }
         };
-        
+
         if (inputEl && submitBtn) {
           inputEl.addEventListener('keydown', (e) => {
             e.stopPropagation(); // prevent closing image
@@ -979,7 +979,7 @@ export default function DomeGallery({
                         />
                         <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.1)', pointerEvents: 'none' }}>
                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)', display: 'grid', placeItems: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
                           </div>
                         </div>
                       </div>
