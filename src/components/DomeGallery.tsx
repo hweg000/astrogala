@@ -384,11 +384,13 @@ export default function DomeGallery({
 
   // ─── Remove caption card helper ───────────────────────────────────────────
   const removeCaptionCard = () => {
-    const card = viewerRef.current?.querySelector('.caption-card') as HTMLElement | null;
+    // Mobile bottom sheets use position:fixed, desktop cards use position:absolute
+    const card = (viewerRef.current?.querySelector('.caption-card') ?? document.querySelector('.caption-card')) as HTMLElement | null;
     if (!card) return;
+    const isMobileCard = card.style.position === 'fixed';
     card.style.opacity = '0';
-    card.style.transform = 'translateX(-50%) translateY(16px)';
-    setTimeout(() => card.remove(), 350);
+    card.style.transform = isMobileCard ? 'translateY(100%)' : 'translateX(-50%) translateY(16px)';
+    setTimeout(() => card.remove(), 400);
   };
 
   useEffect(() => {
@@ -645,31 +647,41 @@ export default function DomeGallery({
       `;
 
       if (isMobile) {
-        // ── Mobile: centered below image ─────────────────────────────────────
-        const cardTop = overlayRect.bottom - mainRect.top + 12;
-        const cardLeft = Math.max(12, overlayRect.left - mainRect.left);
-        const cardW = Math.min(overlayRect.width, mainRect.width - 24);
+        // ── Mobile: fixed bottom sheet that slides up ─────────────────────
         card.style.cssText = `
-          position: absolute;
-          top: ${cardTop}px;
-          left: ${cardLeft}px;
-          width: ${cardW}px;
-          z-index: 35;
-          background: rgba(15,5,30,0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 14px;
-          padding: 14px 16px;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          width: 100%;
+          max-height: 55vh;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          z-index: 9999;
+          background: rgba(10,3,25,0.95);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border-top: 1px solid rgba(255,255,255,0.15);
+          border-radius: 18px 18px 0 0;
+          padding: 16px 20px env(safe-area-inset-bottom, 16px);
           opacity: 0;
-          transform: translateY(12px);
-          transition: opacity 350ms ease, transform 350ms ease;
-          pointer-events: auto; /* ALLOW CLICKS */
-          box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+          transform: translateY(100%);
+          transition: opacity 350ms ease, transform 380ms cubic-bezier(0.32, 0.72, 0, 1);
+          pointer-events: auto;
+          box-shadow: 0 -4px 32px rgba(0,0,0,0.6);
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
         `;
+        // Add a drag handle indicator
+        const handle = document.createElement('div');
+        handle.style.cssText = `
+          width: 40px; height: 4px; border-radius: 99px;
+          background: rgba(255,255,255,0.25);
+          margin: 0 auto 8px;
+          flex-shrink: 0;
+        `;
+        card.insertBefore(handle, card.firstChild);
       } else {
         // ── Desktop: to the right of the image ────────────────────────────────
         const cardLeft = overlayRect.right - mainRect.left + 20;
@@ -702,7 +714,14 @@ export default function DomeGallery({
       }
 
       card.innerHTML = cardInnerHTML;
-      viewerRef.current!.appendChild(card);
+      // Mobile: append to body so position:fixed works (transforms on ancestors break fixed positioning)
+      // Desktop: append to viewer for proper layering
+      if (isMobile) {
+        document.body.appendChild(card);
+      } else {
+        viewerRef.current!.appendChild(card);
+      }
+
 
       // Attach event listener for LIKE
       if (photoId) {
