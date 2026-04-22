@@ -294,25 +294,6 @@ const qrSvg = await QRCode.toString(uploadUrl, {
           >
         </div>
       </div>
-
-      <!-- URL -->
-      <div class="url-pill">{uploadUrl}</div>
-
-      <!-- Print button (hidden on print) -->
-      <button
-        onclick="window.print()"
-        style="
-        background: none; border: 1px solid rgba(255,255,255,0.12);
-        color: rgba(255,255,255,0.35); border-radius: 99px;
-        padding: 8px 20px; font-size: 0.8rem; cursor: pointer;
-        transition: all 0.2s;
-      "
-        onmouseover="this.style.color='rgba(255,255,255,0.7)'"
-        onmouseout="this.style.color='rgba(255,255,255,0.35)'"
-        class="no-print"
-      >
-        🖨️ Imprimir / Guardar PDF
-      </button>
     </div>
   </body>
 </html>
