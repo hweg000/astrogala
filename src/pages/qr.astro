@@ -59,6 +59,10 @@ const qrSvg = await QRCode.toString(uploadUrl, {
       justify-content: center;
       padding: 20px;
       min-height: 100vh;
+      min-height: 100dvh;
+    }
+    @media (max-width: 600px) {
+      body { padding: 40px 16px; justify-content: flex-start; overflow-y: auto; }
     }
 
     .hero-title { font-family: 'Cormorant Garamond', serif; }
@@ -79,18 +83,27 @@ const qrSvg = await QRCode.toString(uploadUrl, {
       box-shadow: 0 12px 40px rgba(0,0,0,0.4);
       z-index: 60;
       pointer-events: auto;
-      max-height: 85vh;
+      max-height: 80vh;
       overflow-y: auto;
       scrollbar-width: none;
     }
     .card::-webkit-scrollbar { display: none; }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 16px;
+        gap: 10px;
+        max-height: 75vh; /* Leave more space for browser UI */
+      }
+      .qr-wrap { padding: 8px !important; }
+    }
 
     /* ── QR wrapper ───────────────────────────────────────────── */
     .qr-wrap {
       background: #f5f0ff;
       border-radius: 16px;
       padding: 12px;
-      width: min(220px, 50vw);
+      width: min(200px, 45vw);
       aspect-ratio: 1;
       display: flex;
       align-items: center;
@@ -104,6 +117,12 @@ const qrSvg = await QRCode.toString(uploadUrl, {
       flex-direction: column;
       gap: 10px;
       width: 100%;
+    }
+    @media (max-width: 600px) {
+      .steps { gap: 6px; }
+      .step { padding: 8px 12px !important; }
+      .step-text { font-size: 0.8rem !important; }
+      .hero-title { font-size: 1.4rem !important; }
     }
     .step {
       display: flex;
