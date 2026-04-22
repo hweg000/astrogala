@@ -27,23 +27,36 @@ export default function InfiniteGrid({ photos, autoScrollSpeed = { x: 0.3, y: 0.
     return result;
   }, [photos]);
 
-  const COL_COUNT = 4;
-  const TILE_WIDTH = 300;
-  const TILE_HEIGHT = 400;
-  const GAP = 20;
+  const [layout, setLayout] = useState({ colCount: 4, tileWidth: 300, tileHeight: 400, gap: 20 });
+
+  useEffect(() => {
+    const updateLayout = () => {
+      const w = window.innerWidth;
+      if (w < 640) {
+        setLayout({ colCount: 2, tileWidth: w * 0.42, tileHeight: w * 0.55, gap: 12 });
+      } else if (w < 1024) {
+        setLayout({ colCount: 3, tileWidth: 240, tileHeight: 320, gap: 16 });
+      } else {
+        setLayout({ colCount: 4, tileWidth: 300, tileHeight: 400, gap: 20 });
+      }
+    };
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => window.removeEventListener('resize', updateLayout);
+  }, []);
+
+  const { colCount, tileWidth, tileHeight, gap } = layout;
 
   useEffect(() => {
     const updateSize = () => {
       if (!containerRef.current) return;
       setGridSize({
-        width: COL_COUNT * (TILE_WIDTH + GAP),
-        height: Math.ceil(pool.length / COL_COUNT) * (TILE_HEIGHT + GAP)
+        width: colCount * (tileWidth + gap),
+        height: Math.ceil(pool.length / colCount) * (tileHeight + gap)
       });
     };
     updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, [pool]);
+  }, [pool, colCount, tileWidth, tileHeight, gap]);
 
   const bind = useGesture({
     onDrag: ({ delta: [dx, dy] }) => {
@@ -85,8 +98,8 @@ export default function InfiniteGrid({ photos, autoScrollSpeed = { x: 0.3, y: 0.
         top: offsetY,
         left: offsetX,
         display: 'grid',
-        gridTemplateColumns: `repeat(${COL_COUNT}, ${TILE_WIDTH}px)`,
-        gap: `${GAP}px`,
+        gridTemplateColumns: `repeat(${colCount}, ${tileWidth}px)`,
+        gap: `${gap}px`,
         width: gridSize.width,
         height: gridSize.height,
       }}
@@ -95,8 +108,8 @@ export default function InfiniteGrid({ photos, autoScrollSpeed = { x: 0.3, y: 0.
         <div 
           key={`${p.id}-${i}`}
           style={{
-            width: TILE_WIDTH,
-            height: TILE_HEIGHT,
+            width: tileWidth,
+            height: tileHeight,
             position: 'relative',
             borderRadius: '16px',
             overflow: 'hidden',

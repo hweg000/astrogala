@@ -75,20 +75,22 @@ const qrSvg = await QRCode.toString(uploadUrl, {
       align-items: center;
       gap: 14px;
       width: 100%;
-      max-width: 340px;
+      max-width: min(380px, 92vw);
       box-shadow: 0 12px 40px rgba(0,0,0,0.4);
       z-index: 60;
       pointer-events: auto;
-      max-height: 90vh;
+      max-height: 85vh;
       overflow-y: auto;
+      scrollbar-width: none;
     }
+    .card::-webkit-scrollbar { display: none; }
 
     /* ── QR wrapper ───────────────────────────────────────────── */
     .qr-wrap {
       background: #f5f0ff;
       border-radius: 16px;
       padding: 12px;
-      width: 180px;
+      width: min(220px, 50vw);
       aspect-ratio: 1;
       display: flex;
       align-items: center;
