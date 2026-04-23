@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import DomeGallery from './DomeGallery';
 import { downloadPolaroid } from '../utils/polaroid';
 import Galaxy from './Galaxy';
@@ -18,6 +18,234 @@ interface Props {
   initialPhotos: Photo[];
   isTotemMode?: boolean;
 }
+
+// ── Lightbox Modal ───────────────────────────────────────────────────────────
+function Lightbox({ photos, startIndex, onClose }: {
+  photos: Photo[];
+  startIndex: number;
+  onClose: () => void;
+}) {
+  const [idx, setIdx] = useState(startIndex);
+  const [visible, setVisible] = useState(false);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+
+  const current = photos[idx];
+  const isVid = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
+
+  const prev = useCallback(() => setIdx(i => (i - 1 + photos.length) % photos.length), [photos.length]);
+  const next = useCallback(() => setIdx(i => (i + 1) % photos.length), [photos.length]);
+
+  const close = useCallback(() => {
+    setVisible(false);
+    setTimeout(onClose, 280);
+  }, [onClose]);
+
+  // Mount animation
+  useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [close, prev, next]);
+
+  // Touch/swipe gestures
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+    if (Math.abs(dx) > 50 && dy < 80) {
+      if (dx < 0) next(); else prev();
+    }
+  };
+
+  return (
+    <div
+      onClick={close}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: `rgba(5,2,15,${visible ? 0.96 : 0})`,
+        backdropFilter: `blur(${visible ? 18 : 0}px)`,
+        WebkitBackdropFilter: `blur(${visible ? 18 : 0}px)`,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        transition: 'background 280ms ease, backdrop-filter 280ms ease',
+        userSelect: 'none',
+      }}
+    >
+      {/* Close button */}
+      <button
+        onClick={close}
+        style={{
+          position: 'absolute', top: '20px', right: '20px',
+          width: '40px', height: '40px', borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+          color: 'white', fontSize: '1.2rem', cursor: 'pointer',
+          display: 'grid', placeItems: 'center', backdropFilter: 'blur(10px)',
+          transition: 'background 0.2s, transform 0.2s', zIndex: 10,
+        }}
+        onPointerEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
+        onPointerLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+        aria-label="Cerrar"
+      >✕</button>
+
+      {/* Counter */}
+      <div style={{
+        position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)',
+        background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.12)', borderRadius: '99px',
+        padding: '4px 14px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)',
+      }}>
+        {idx + 1} / {photos.length}
+      </div>
+
+      {/* Main media */}
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: 'min(85vw, 480px)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', gap: '16px',
+          transform: visible ? 'scale(1)' : 'scale(0.88)',
+          opacity: visible ? 1 : 0,
+          transition: 'transform 280ms cubic-bezier(0.32,0.72,0,1), opacity 280ms ease',
+        }}
+      >
+        {/* Fixed-size media box — always the same dimensions */}
+        <div style={{
+          width: '100%',
+          height: 'min(85vw, 480px)',
+          borderRadius: '18px',
+          overflow: 'hidden',
+          background: 'rgba(0,0,0,0.7)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          {isVid(current.url) ? (
+            <video
+              key={current.url}
+              src={current.url}
+              autoPlay loop muted playsInline controls
+              style={{
+                width: '100%', height: '100%',
+                objectFit: 'contain',
+              }}
+            />
+          ) : (
+            <img
+              key={current.url}
+              src={current.url}
+              alt={`Foto de ${current.guestName}`}
+              style={{
+                width: '100%', height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          )}
+        </div>
+
+        {/* Caption area */}
+        {(current.guestName || current.caption) && (
+          <div style={{
+            width: '100%', background: 'rgba(15,5,30,0.8)',
+            backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px',
+            padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '6px',
+          }}>
+            {current.guestName && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>DE:</span>
+                <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 700, fontSize: '1.1rem', color: '#fff' }}>
+                  {current.guestName}
+                </span>
+              </div>
+            )}
+            {current.caption && (
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', fontStyle: 'italic', fontFamily: 'Georgia, serif', borderLeft: '2px solid rgba(225,29,72,0.6)', paddingLeft: '10px', lineHeight: 1.5 }}>
+                "{current.caption}"
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Prev / Next arrows */}
+      {photos.length > 1 && (
+        <>
+          <button
+            onClick={e => { e.stopPropagation(); prev(); }}
+            style={{
+              position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
+              width: '44px', height: '44px', borderRadius: '50%',
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              color: 'white', fontSize: '1.3rem', cursor: 'pointer',
+              display: 'grid', placeItems: 'center', backdropFilter: 'blur(10px)',
+              transition: 'background 0.2s, transform 0.15s',
+            }}
+            onPointerEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'; }}
+            onPointerLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; }}
+            aria-label="Anterior"
+          >‹</button>
+
+          <button
+            onClick={e => { e.stopPropagation(); next(); }}
+            style={{
+              position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+              width: '44px', height: '44px', borderRadius: '50%',
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              color: 'white', fontSize: '1.3rem', cursor: 'pointer',
+              display: 'grid', placeItems: 'center', backdropFilter: 'blur(10px)',
+              transition: 'background 0.2s, transform 0.15s',
+            }}
+            onPointerEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'; }}
+            onPointerLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; }}
+            aria-label="Siguiente"
+          >›</button>
+        </>
+      )}
+
+      {/* Dot indicators (max 10) */}
+      {photos.length > 1 && photos.length <= 20 && (
+        <div style={{
+          position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', gap: '6px',
+        }}>
+          {photos.map((_, i) => (
+            <button
+              key={i}
+              onClick={e => { e.stopPropagation(); setIdx(i); }}
+              style={{
+                width: i === idx ? '20px' : '8px', height: '8px',
+                borderRadius: '99px', border: 'none', cursor: 'pointer',
+                background: i === idx ? '#e11d48' : 'rgba(255,255,255,0.3)',
+                transition: 'all 0.25s ease', padding: 0,
+              }}
+              aria-label={`Foto ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function getDomeProps() {
   if (typeof window === 'undefined') return { fit: 0.55, openedImageWidth: '480px', openedImageHeight: '480px' };
@@ -43,6 +271,11 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
   const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
   const [expandedComments, setExpandedComments] = useState<{ [key: string]: boolean }>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [lightbox, setLightbox] = useState<{ photos: Photo[]; index: number } | null>(null);
+
+  const openLightbox = useCallback((photos: Photo[], index: number) => {
+    setLightbox({ photos, index });
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -357,7 +590,22 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
                   <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', fontWeight: 600, color: '#fff' }}>{p.guestName}</span>
                 </div>
 
-                <div style={{ borderRadius: '16px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.5)', aspectRatio: '1/1', position: 'relative' }}>
+                <div
+                  onClick={() => openLightbox(filtered, filtered.indexOf(p))}
+                  style={{
+                    borderRadius: '16px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.5)',
+                    aspectRatio: '1/1', position: 'relative', cursor: 'pointer',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  }}
+                  onPointerEnter={e => {
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(225,29,72,0.25)';
+                  }}
+                  onPointerLeave={e => {
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                  }}
+                >
                   {p.url.match(/\.(mp4|webm|mov)$/i) ? (
                     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                       <video
@@ -375,6 +623,7 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
                   ) : (
                     <img src={p.url} alt="Foto" style={{ width: '100%', height: '100%', objectFit: 'contain' }} loading="lazy" />
                   )}
+
                 </div>
 
                 {p.caption && (
@@ -454,6 +703,15 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
             )}
           </div>
         </div>
+      )}
+
+      {/* Lightbox modal */}
+      {lightbox && (
+        <Lightbox
+          photos={lightbox.photos}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
       )}
     </>
   );
