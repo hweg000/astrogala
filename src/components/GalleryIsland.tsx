@@ -280,7 +280,7 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setOpen(false);
+      if (!(e.target as Element).closest?.('.filter-dropdown-container')) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -377,22 +377,24 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
   };
 
   const FilterButton = ({ selectedGuest, setOpen, open, photos, guests, select }: any) => (
-    <button
-      onClick={() => setOpen(!open)}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '7px',
-        padding: '7px 16px', borderRadius: '99px',
-        border: `1px solid ${selectedGuest ? 'rgba(225,29,72,0.7)' : 'rgba(255,255,255,0.15)'}`,
-        background: selectedGuest ? 'rgba(225,29,72,0.2)' : 'rgba(255,255,255,0.07)',
-        backdropFilter: 'blur(16px)', color: selectedGuest ? '#fff' : 'rgba(255,255,255,0.55)',
-        fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
-      }}
-    >
-      <span>👥</span>
-      <span>{selectedGuest ?? 'Ver por persona'}</span>
-      {selectedGuest && (
-        <span onClick={e => { e.stopPropagation(); select(null); }} style={{ marginLeft: '2px', opacity: 0.6, fontSize: '0.75rem', cursor: 'pointer' }}>✕</span>
-      )}
+    <div style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '7px',
+          padding: '7px 16px', borderRadius: '99px',
+          border: `1px solid ${selectedGuest ? 'rgba(225,29,72,0.7)' : 'rgba(255,255,255,0.15)'}`,
+          background: selectedGuest ? 'rgba(225,29,72,0.2)' : 'rgba(255,255,255,0.07)',
+          backdropFilter: 'blur(16px)', color: selectedGuest ? '#fff' : 'rgba(255,255,255,0.55)',
+          fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
+        }}
+      >
+        <span>👥</span>
+        <span>{selectedGuest ?? 'Ver por persona'}</span>
+        {selectedGuest && (
+          <span onClick={e => { e.stopPropagation(); select(null); }} style={{ marginLeft: '2px', opacity: 0.6, fontSize: '0.75rem', cursor: 'pointer' }}>✕</span>
+        )}
+      </button>
       {open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)',
@@ -407,12 +409,12 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
           {guests.map((name: string) => (
             <button key={name} onClick={() => select(name)} className="filter-item-btn" style={{ background: selectedGuest === name ? 'rgba(225,29,72,0.2)' : 'transparent', color: selectedGuest === name ? '#fff' : 'rgba(255,255,255,0.65)' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>{selectedGuest === name && <span style={{ color: '#e11d48' }}>✓</span>}{name}</span>
-              <span style={{ background: selectedGuest === name ? 'rgba(225,29,72,0.4)' : 'rgba(255,255,255,0.12)', borderRadius: '99px', padding: '1px 8px', fontSize: '0.72rem' }}>{photos.filter(p => p.guestName === name).length}</span>
+              <span style={{ background: selectedGuest === name ? 'rgba(225,29,72,0.4)' : 'rgba(255,255,255,0.12)', borderRadius: '99px', padding: '1px 8px', fontSize: '0.72rem' }}>{photos.filter((p: any) => p.guestName === name).length}</span>
             </button>
           ))}
         </div>
       )}
-    </button>
+    </div>
   );
 
   return (
@@ -511,7 +513,7 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
           </div>
 
           {!isTotemMode && guests.length > 1 && (
-            <div ref={dropdownRef} className="hidden md:block desktop-hud-el" style={{ top: '84px', left: '50%', transform: 'translateX(-50%)' }}>
+            <div className="filter-dropdown-container hidden md:block desktop-hud-el" style={{ top: '84px', left: '50%', transform: 'translateX(-50%)' }}>
               <FilterButton selectedGuest={selectedGuest} setOpen={setOpen} open={open} photos={photos} guests={guests} select={select} />
             </div>
           )}
@@ -527,7 +529,7 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
             </a>
 
             {guests.length > 1 && (
-              <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <div className="filter-dropdown-container" style={{ position: 'relative' }}>
                 <button className="dock-btn" onClick={() => setOpen(!open)}>
                   👥 Filtros
                 </button>
