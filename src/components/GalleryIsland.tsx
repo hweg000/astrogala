@@ -257,12 +257,13 @@ function getDomeProps() {
   const isTotem = isPortrait && w >= 500;
 
   if (isMobile) return { 
-    fit: 0.60, 
+    fit: 0.62, 
     fitBasis: 'width' as const, 
     openedImageWidth: `${Math.min(w - 32, 340)}px`, 
     openedImageHeight: `${Math.min(w - 32, 340)}px`,
-    maxVerticalRotationDeg: 45,
-    dragSensitivity: 15 
+    maxVerticalRotationDeg: 75,
+    dragSensitivity: 10,
+    segments: 45
   };
   if (isTotem) return { fit: 0.65, fitBasis: 'max' as const, openedImageWidth: '500px', openedImageHeight: '500px' };
   if (isTablet) return { fit: 0.50, openedImageWidth: '420px', openedImageHeight: '420px' };

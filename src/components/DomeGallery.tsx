@@ -71,36 +71,14 @@ const getDataNumber = (el: HTMLElement, name: string, fallback: number) => {
 };
 
 function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
-  const rows = 8; 
-  const cols = seg;
-  const coords = [];
-  
-  for (let r = 0; r < rows; r++) {
-    // Increased vertical spacing to avoid overlapping
-    const y = (r - (rows - 1) / 2) * 5.2; 
-    const isOdd = r % 2 !== 0;
-    
-    for (let c = 0; c < cols; c++) {
-      // Horizontal spacing slightly increased
-      let x = (c - cols / 2) * 2.1;
-      if (isOdd) x += 1.05; // Stagger
-      
-      // Reduced jitter to keep items in their "slots"
-      const jitterX = Math.sin(c * 1.5 + r) * 0.2;
-      const jitterY = Math.cos(r * 1.5 + c) * 0.2;
-      
-      // Size stays below spacing (2.1) to prevent horizontal overlap
-      const sizeVar = Math.abs(Math.sin(c * 0.5 + r * 0.7)) * 0.4;
-      const size = 1.4 + sizeVar; // Max size 1.8
-      
-      coords.push({ 
-        x: x + jitterX, 
-        y: y + jitterY, 
-        sizeX: size, 
-        sizeY: size 
-      });
-    }
-  }
+  const xCols = Array.from({ length: seg }, (_, i) => -37 + i * 2);
+  const evenYs = [-14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14];
+  const oddYs = [-13, -11, -9, -7, -5, -3, -1, 1, 3, 5, 7, 9, 11, 13, 15];
+
+  const coords = xCols.flatMap((x, c) => {
+    const ys = c % 2 === 0 ? evenYs : oddYs;
+    return ys.map(y => ({ x, y, sizeX: 2, sizeY: 2 }));
+  });
 
   const totalSlots = coords.length;
   if (pool.length === 0) {
@@ -120,14 +98,19 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
     };
   });
 
-  // Fill slots by cycling through images
   const usedImages = Array.from({ length: totalSlots }, (_, i) => normalizedImages[i % normalizedImages.length]);
 
-  // Shuffle a bit to avoid obvious patterns of repetition if we have few images
-  // (Deterministic swap)
-  for (let i = 0; i < usedImages.length; i++) {
-    const swapIdx = (i * 7 + 3) % usedImages.length;
-    [usedImages[i], usedImages[swapIdx]] = [usedImages[swapIdx], usedImages[i]];
+  for (let i = 1; i < usedImages.length; i++) {
+    if (usedImages[i].src === usedImages[i - 1].src) {
+      for (let j = i + 1; j < usedImages.length; j++) {
+        if (usedImages[j].src !== usedImages[i].src) {
+          const tmp = usedImages[i];
+          usedImages[i] = usedImages[j];
+          usedImages[j] = tmp;
+          break;
+        }
+      }
+    }
   }
 
   return coords.map((c, i) => ({
@@ -953,6 +936,7 @@ export default function DomeGallery({
           ['--image-filter' as any]: grayscale ? 'grayscale(1)' : 'none',
           ['--projection-sphere' as any]: projection === 'sphere' ? 1 : 0,
           ['--projection-cylinder' as any]: projection === 'cylinder' ? 1 : 0,
+          ['--grad-h' as any]: window.innerWidth < 640 ? '60px' : '120px',
         } as React.CSSProperties}
       >
         <main
@@ -1037,8 +1021,8 @@ export default function DomeGallery({
           {/* Radial overlay */}
           <div className="absolute inset-0 m-auto z-[3] pointer-events-none" style={{ backgroundImage: `radial-gradient(rgba(235,235,235,0) 65%, var(--overlay-blur-color,${overlayBlurColor}) 100%)` }} />
           <div className="absolute inset-0 m-auto z-[3] pointer-events-none" style={{ WebkitMaskImage: `radial-gradient(rgba(235,235,235,0) 70%, var(--overlay-blur-color,${overlayBlurColor}) 90%)`, maskImage: `radial-gradient(rgba(235,235,235,0) 70%, var(--overlay-blur-color,${overlayBlurColor}) 90%)`, backdropFilter: 'blur(3px)' }} />
-          <div className="absolute left-0 right-0 top-0 h-[120px] z-[5] pointer-events-none rotate-180" style={{ background: `linear-gradient(to bottom, transparent, var(--overlay-blur-color,${overlayBlurColor}))` }} />
-          <div className="absolute left-0 right-0 bottom-0 h-[120px] z-[5] pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, var(--overlay-blur-color,${overlayBlurColor}))` }} />
+          <div className="absolute left-0 right-0 top-0 h-[var(--grad-h,120px)] z-[5] pointer-events-none rotate-180" style={{ background: `linear-gradient(to bottom, transparent, var(--overlay-blur-color,${overlayBlurColor}))` }} />
+          <div className="absolute left-0 right-0 bottom-0 h-[var(--grad-h,120px)] z-[5] pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, var(--overlay-blur-color,${overlayBlurColor}))` }} />
 
           {/* Viewer (overlay + scrim + frame + caption card live here) */}
           <div ref={viewerRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center" style={{ padding: 'var(--viewer-pad)' }}>
