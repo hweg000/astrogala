@@ -52,7 +52,7 @@ const DEFAULT_IMAGES: ImageItem[] = [
 ];
 
 const DEFAULTS = {
-  maxVerticalRotationDeg: 5,
+  maxVerticalRotationDeg: 40,
   dragSensitivity: 20,
   enlargeTransitionMs: 300,
   segments: 35
@@ -71,14 +71,40 @@ const getDataNumber = (el: HTMLElement, name: string, fallback: number) => {
 };
 
 function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
-  const xCols = Array.from({ length: seg }, (_, i) => -37 + i * 2);
-  const evenYs = [-14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14];
-  const oddYs = [-13, -11, -9, -7, -5, -3, -1, 1, 3, 5, 7, 9, 11, 13, 15];
-
-  const coords = xCols.flatMap((x, c) => {
-    const ys = c % 2 === 0 ? evenYs : oddYs;
-    return ys.map(y => ({ x, y, sizeX: 2, sizeY: 2 }));
-  });
+  const rows = 12;
+  const cols = seg;
+  const coords = [];
+  
+  for (let r = 0; r < rows; r++) {
+    // Spread y from approx -14 to 14
+    const y = (r - (rows - 1) / 2) * 2.5; 
+    const isOdd = r % 2 !== 0;
+    
+    // For rows at the extremes (poles), we need fewer items or they will be too crowded
+    // But since this is a CSS 3D "cylinder/sphere", the "crowding" is handled by the math.
+    // However, it looks better if we stagger them.
+    
+    for (let c = 0; c < cols; c++) {
+      let x = (c - cols / 2) * 2;
+      if (isOdd) x += 1; // Stagger
+      
+      // Deterministic "organic" feel using sine/cosine
+      const jitterX = Math.sin(c * 1.2 + r * 0.8) * 0.4;
+      const jitterY = Math.cos(r * 1.2 + c * 0.8) * 0.4;
+      
+      // Vary sizes slightly for a more dynamic look
+      // We use a deterministic pseudo-random based on indices
+      const sizeVar = Math.abs(Math.sin(c * 0.5 + r * 0.7)) * 0.6;
+      const size = 1.7 + sizeVar;
+      
+      coords.push({ 
+        x: x + jitterX, 
+        y: y + jitterY, 
+        sizeX: size, 
+        sizeY: size 
+      });
+    }
+  }
 
   const totalSlots = coords.length;
   if (pool.length === 0) {
@@ -98,19 +124,14 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
     };
   });
 
+  // Fill slots by cycling through images
   const usedImages = Array.from({ length: totalSlots }, (_, i) => normalizedImages[i % normalizedImages.length]);
 
-  for (let i = 1; i < usedImages.length; i++) {
-    if (usedImages[i].src === usedImages[i - 1].src) {
-      for (let j = i + 1; j < usedImages.length; j++) {
-        if (usedImages[j].src !== usedImages[i].src) {
-          const tmp = usedImages[i];
-          usedImages[i] = usedImages[j];
-          usedImages[j] = tmp;
-          break;
-        }
-      }
-    }
+  // Shuffle a bit to avoid obvious patterns of repetition if we have few images
+  // (Deterministic swap)
+  for (let i = 0; i < usedImages.length; i++) {
+    const swapIdx = (i * 7 + 3) % usedImages.length;
+    [usedImages[i], usedImages[swapIdx]] = [usedImages[swapIdx], usedImages[i]];
   }
 
   return coords.map((c, i) => ({

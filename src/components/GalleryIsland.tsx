@@ -256,7 +256,14 @@ function getDomeProps() {
   const isTablet = w >= 640 && w < 1024;
   const isTotem = isPortrait && w >= 500;
 
-  if (isMobile) return { fit: 0.58, fitBasis: 'width' as const, openedImageWidth: `${Math.min(w - 32, 340)}px`, openedImageHeight: `${Math.min(w - 32, 340)}px` };
+  if (isMobile) return { 
+    fit: 0.65, 
+    fitBasis: 'width' as const, 
+    openedImageWidth: `${Math.min(w - 32, 340)}px`, 
+    openedImageHeight: `${Math.min(w - 32, 340)}px`,
+    maxVerticalRotationDeg: 45,
+    dragSensitivity: 15 
+  };
   if (isTotem) return { fit: 0.65, fitBasis: 'max' as const, openedImageWidth: '500px', openedImageHeight: '500px' };
   if (isTablet) return { fit: 0.50, openedImageWidth: '420px', openedImageHeight: '420px' };
   return { fit: 0.52, openedImageWidth: '480px', openedImageHeight: '480px' };
@@ -576,7 +583,6 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
           overlayBlurColor="#0d0618"
           imageBorderRadius="14px"
           openedImageBorderRadius="18px"
-          dragSensitivity={22}
           autoRotate={true}
           autoRotateSpeed={0.05}
           projection={isTotemMode ? 'cylinder' : 'sphere'}
