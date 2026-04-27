@@ -936,7 +936,7 @@ export default function DomeGallery({
           ['--image-filter' as any]: grayscale ? 'grayscale(1)' : 'none',
           ['--projection-sphere' as any]: projection === 'sphere' ? 1 : 0,
           ['--projection-cylinder' as any]: projection === 'cylinder' ? 1 : 0,
-          ['--grad-h' as any]: window.innerWidth < 640 ? '60px' : '120px',
+          ['--grad-h' as any]: (typeof window !== 'undefined' && window.innerWidth < 640) ? '60px' : '120px',
         } as React.CSSProperties}
       >
         <main
