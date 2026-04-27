@@ -257,7 +257,7 @@ function getDomeProps() {
   const isTotem = isPortrait && w >= 500;
 
   if (isMobile) return { 
-    fit: 0.65, 
+    fit: 0.60, 
     fitBasis: 'width' as const, 
     openedImageWidth: `${Math.min(w - 32, 340)}px`, 
     openedImageHeight: `${Math.min(w - 32, 340)}px`,

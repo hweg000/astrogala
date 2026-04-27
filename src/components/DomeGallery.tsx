@@ -71,31 +71,27 @@ const getDataNumber = (el: HTMLElement, name: string, fallback: number) => {
 };
 
 function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
-  const rows = 12;
+  const rows = 8; 
   const cols = seg;
   const coords = [];
   
   for (let r = 0; r < rows; r++) {
-    // Spread y from approx -14 to 14
-    const y = (r - (rows - 1) / 2) * 2.5; 
+    // Increased vertical spacing to avoid overlapping
+    const y = (r - (rows - 1) / 2) * 5.2; 
     const isOdd = r % 2 !== 0;
     
-    // For rows at the extremes (poles), we need fewer items or they will be too crowded
-    // But since this is a CSS 3D "cylinder/sphere", the "crowding" is handled by the math.
-    // However, it looks better if we stagger them.
-    
     for (let c = 0; c < cols; c++) {
-      let x = (c - cols / 2) * 2;
-      if (isOdd) x += 1; // Stagger
+      // Horizontal spacing slightly increased
+      let x = (c - cols / 2) * 2.1;
+      if (isOdd) x += 1.05; // Stagger
       
-      // Deterministic "organic" feel using sine/cosine
-      const jitterX = Math.sin(c * 1.2 + r * 0.8) * 0.4;
-      const jitterY = Math.cos(r * 1.2 + c * 0.8) * 0.4;
+      // Reduced jitter to keep items in their "slots"
+      const jitterX = Math.sin(c * 1.5 + r) * 0.2;
+      const jitterY = Math.cos(r * 1.5 + c) * 0.2;
       
-      // Vary sizes slightly for a more dynamic look
-      // We use a deterministic pseudo-random based on indices
-      const sizeVar = Math.abs(Math.sin(c * 0.5 + r * 0.7)) * 0.6;
-      const size = 1.7 + sizeVar;
+      // Size stays below spacing (2.1) to prevent horizontal overlap
+      const sizeVar = Math.abs(Math.sin(c * 0.5 + r * 0.7)) * 0.4;
+      const size = 1.4 + sizeVar; // Max size 1.8
       
       coords.push({ 
         x: x + jitterX, 
