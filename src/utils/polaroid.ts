@@ -106,22 +106,19 @@ export async function downloadPolaroid(imageUrl: string, guestName: string, capt
       ctx.fillText('"' + line.trim() + '"', canvas.width / 2, textY);
     }
 
-    // Branding (Footer)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.font = '32px sans-serif';
-    ctx.fillText('AstroGala 2026', canvas.width / 2, 1800);
+
 
     // SHARE LOGIC
     canvas.toBlob(async (blob) => {
       if (!blob) return;
-      const file = new File([blob], `AstroGala-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `AndreaYPepe-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             files: [file],
             title: 'Recuerdo de la Boda',
-            text: 'Miren esta foto de la AstroGala ✨'
+            text: 'Miren esta foto de la boda de Andrea y Pepe ✨'
           });
           return;
         } catch (e) {}
@@ -129,7 +126,7 @@ export async function downloadPolaroid(imageUrl: string, guestName: string, capt
 
       // Fallback download
       const link = document.createElement('a');
-      link.download = `Recuerdo-AstroGala.jpg`;
+      link.download = `Recuerdo-AndreaYPepe.jpg`;
       link.href = URL.createObjectURL(blob);
       link.click();
     }, 'image/jpeg', 0.95);
