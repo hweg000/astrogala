@@ -310,7 +310,7 @@ export default function GalleryIsland({ initialPhotos, isTotemMode = false }: Pr
         const el = document.getElementById('count-num');
         if (el) el.textContent = data.length;
       } catch { }
-    }, 30_000);
+    }, 5_000);
     return () => clearInterval(interval);
   }, []);
 
