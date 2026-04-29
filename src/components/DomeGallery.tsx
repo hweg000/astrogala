@@ -42,13 +42,7 @@ type ItemDef = {
 };
 
 const DEFAULT_IMAGES: ImageItem[] = [
-  { src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800', alt: 'Wedding', guestName: 'Demo', caption: '¡Que vivan los novios!' },
-  { src: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800', alt: 'Couple', guestName: 'Demo', caption: 'Felicidades 🥂' },
-  { src: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800', alt: 'Flowers', guestName: 'Demo', caption: 'Un día mágico 🌸' },
-  { src: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800', alt: 'Rings', guestName: 'Demo', caption: 'Para siempre 💍' },
-  { src: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800', alt: 'Ceremony', guestName: 'Demo', caption: 'Un momento único' },
-  { src: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=800', alt: 'Celebration', guestName: 'Demo', caption: '¡A celebrar! 🎉' },
-  { src: 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800', alt: 'Dance', guestName: 'Demo', caption: 'Bailando toda la noche 💃' },
+  { src: 'https://trescuadra.cl/cdn/shop/files/TUFOTOAQUI.png?v=1761453459', alt: 'tu_foto_aqui', guestName: 'DEMO', caption: 'Demostracion' },
 ];
 
 const DEFAULTS = {
