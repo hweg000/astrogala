@@ -76,6 +76,34 @@ export default function AdminPanel() {
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
   const [filter, setFilter] = useState<'all' | 'approved' | 'pending'>('all');
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [downloadingZip, setDownloadingZip] = useState(false);
+
+  const handleDownloadZip = async () => {
+    if (photos.length === 0) return;
+    setDownloadingZip(true);
+    try {
+      const res = await fetch('/api/admin/download-zip', {
+        headers: { 'Authorization': 'Bearer 2026' }
+      });
+      if (!res.ok) {
+        throw new Error('Error al descargar el ZIP');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'astrogala-fotos.zip';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert('Hubo un error al generar el archivo ZIP. Por favor, intenta de nuevo.');
+    } finally {
+      setDownloadingZip(false);
+    }
+  };
 
   const fetchPhotos = useCallback(async () => {
     setLoading(true);
@@ -234,18 +262,44 @@ export default function AdminPanel() {
             <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'white', margin: 0 }}>Panel de Moderación</h1>
             <p style={{ color: 'rgba(255,255,255,0.4)', margin: '4px 0 0', fontSize: '0.9rem' }}>AstroGala — Galería de la Boda</p>
           </div>
-          <button
-            onClick={fetchPhotos}
-            disabled={loading}
-            style={{
-              background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '12px', color: 'white', padding: '10px 20px', cursor: 'pointer',
-              fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px',
-              opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s',
-            }}
-          >
-            {loading ? '⏳' : '🔄'} {loading ? 'Cargando...' : 'Actualizar'}
-          </button>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <button
+              onClick={handleDownloadZip}
+              disabled={downloadingZip || photos.length === 0}
+              style={{
+                background: 'linear-gradient(135deg, #059669, #10b981)',
+                border: 'none',
+                borderRadius: '12px',
+                color: 'white',
+                padding: '10px 20px',
+                cursor: (downloadingZip || photos.length === 0) ? 'not-allowed' : 'pointer',
+                fontSize: '0.88rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontWeight: 600,
+                opacity: (downloadingZip || photos.length === 0) ? 0.6 : 1,
+                transition: 'all 0.2s',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
+              }}
+              onPointerEnter={e => { if (!downloadingZip && photos.length > 0) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onPointerLeave={e => { e.currentTarget.style.transform = 'none'; }}
+            >
+              {downloadingZip ? '📦 Generando ZIP...' : '📥 Descargar ZIP'}
+            </button>
+            <button
+              onClick={fetchPhotos}
+              disabled={loading}
+              style={{
+                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: '12px', color: 'white', padding: '10px 20px', cursor: 'pointer',
+                fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px',
+                opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s',
+              }}
+            >
+              {loading ? '⏳' : '🔄'} {loading ? 'Cargando...' : 'Actualizar'}
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
